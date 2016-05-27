@@ -93,4 +93,10 @@ End-Game
 - 1-2 large chains: defend your position as a majority stock holder in large chains.
 - 2+ large chains: acquire enough stock in as many as you can to secure the second place bonus.
 
+#### Ending the Game
+
+- The game should end at the end of your turn if the game can end, and the player is winning.
+- Consider ending the game if a higher rank is unreachable (e.g. you are in second place, cannot
+  reach first place, and do not want to drop into third place, so you end the game).
+
 ----------------------------------------------------------------------------------------------------
