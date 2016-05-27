@@ -40,11 +40,13 @@ Mid-Game
 
 #### Signs of the Mid-Game
 
-- More than 3 chains have been created.
-- More than 20 tiles have been placed.
+Either:
+- More than 3 chains have been created AND more than 20 tiles have been placed.
 - A chain is safe.
 
 #### General Strategy
+
+- Prepare for end-game by owning majority stocks in the upcoming large chains.
 
 #### Tile Placement
 
@@ -65,13 +67,16 @@ Mid-Game
 End-Game
 ----------------------------------------------------------------------------------------------------
 
+- Now we can generate all possible moves.
+
 #### Signs of the End-Game
 
 - There are more (or equal amount of) safe chains than non-safe chains.
 
 #### General Strategy
 
-- Now we can generate all possible moves.
+- 1-2 large chains: defend your position as a majority stock holder in large chains.
+- 2+ large chains: acquire enough stock in as many as you can to secure the second place bonus.
 - If behind, prevent ending the game by creating new chains.
 
 #### Tile Placement
