@@ -1,11 +1,11 @@
 package halladay.acquire.framework;
 
 import halladay.acquire.Game;
+import halladay.acquire.Logger;
 import halladay.acquire.Player;
 import halladay.acquire.PlayerFactory;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -15,15 +15,17 @@ import java.util.Iterator;
 import java.util.ServiceLoader;
 
 public class Main {
-	
-	private static final int INTERMOVE_DELAY = 100;
-	private static final int INTERGAME_DELAY = 5000;
-	
+
+	//	private static final int INTERMOVE_DELAY = 100;
+//	private static final int INTERGAME_DELAY = 5000;
+	private static final int INTERMOVE_DELAY = 0;
+	private static final int INTERGAME_DELAY = 0;
+
 	private static HashMap<String, Integer> playerScores = new HashMap<>();
 
 	public static void main(String[] args) throws IOException {
 		ArrayList<PlayerFactory> factories = getFactoryList();
-		ArrayList<ArrayList<PlayerFactory>> factoryGroups = chooseN(new ArrayList<PlayerFactory>(), factories, 3);
+		ArrayList<ArrayList<PlayerFactory>> factoryGroups = chooseN(new ArrayList<>(), factories, 3);
 		for (ArrayList<PlayerFactory> group : factoryGroups) {
 			ArrayList<Player> players = createPlayers(group);
 			play(players);
@@ -46,15 +48,15 @@ public class Main {
 		game.setDelay(INTERMOVE_DELAY);
 		Controller controller = new Controller(game, gui);
 		game.register(controller);
-		
+
 		for (Player player : players) {
 			game.addPlayer(player);
 		}
 		game.play();
-		System.out.println("RESULTS:");
+		Logger.GameMessageLog("RESULTS:");
 		game.displayScores();
 		game.scorePlayers(playerScores);
-		
+
 		game.unregister(controller);
 		try {
 			Thread.sleep(INTERGAME_DELAY);
@@ -65,15 +67,13 @@ public class Main {
 	}
 
 	private static ArrayList<PlayerFactory> getFactoryList() throws IOException {
-		File loc = new File("playerPlugins");
-
+		File loc = new File("Acquire/playerPlugins");
+		Logger.GameMessageLog(loc.getAbsolutePath());
 		File[] flist = loc.listFiles(
-				new FileFilter() {
-					public boolean accept(File file) {
-						return file.getPath().toLowerCase().endsWith(".jar");
-					}
+				file -> {
+					return file.getPath().toLowerCase().endsWith(".jar");
 				}
-				);
+		);
 
 		URL[] urls = new URL[flist.length];
 		for (int i = 0; i < flist.length; i++) {
@@ -83,7 +83,7 @@ public class Main {
 
 		ServiceLoader<PlayerFactory> sl = ServiceLoader.load(PlayerFactory.class, ucl);
 
-		ArrayList<PlayerFactory> factories = new ArrayList<PlayerFactory>();
+		ArrayList<PlayerFactory> factories = new ArrayList<>();
 		Iterator<PlayerFactory> apit = sl.iterator();
 		while (apit.hasNext()) {
 			factories.add(apit.next());
@@ -93,9 +93,9 @@ public class Main {
 
 	@SuppressWarnings("unchecked")
 	private static ArrayList<ArrayList<PlayerFactory>> chooseN(ArrayList<PlayerFactory> mustHave, ArrayList<PlayerFactory> mightHave, int n) {
-		ArrayList<ArrayList<PlayerFactory>> result = null;
+		ArrayList<ArrayList<PlayerFactory>> result;
 		if (mustHave.size() + mightHave.size() < n) {
-			result = new ArrayList<ArrayList<PlayerFactory>>();
+			result = new ArrayList<>();
 		} else if (mustHave.size() < n) {
 			PlayerFactory temp = mightHave.remove(0);
 			result = chooseN(mustHave, mightHave, n);
@@ -105,25 +105,25 @@ public class Main {
 			mightHave.add(0,temp);
 			result.addAll(withResult);
 		} else {
-			result = new ArrayList<ArrayList<PlayerFactory>>();
+			result = new ArrayList<>();
 			result.add((ArrayList<PlayerFactory>) mustHave.clone());
 		}
 		return result;
 	}
-	
+
 	private static void displayOverallScores() {
-		System.out.println("Overall scores:");
+		Logger.GameMessageLog("Overall scores:");
 		for (String p : playerScores.keySet()) {
 			int score = playerScores.get(p);
-			System.out.println(p + ": " + score);
+			Logger.GameMessageLog(p + ": " + score);
 		}
 	}
-	
+
 	public static class Controller implements Game.Listener{
-		
+
 		private AcquireGUI gui;
 		private Game game;
-		
+
 		public Controller(Game game, AcquireGUI gui) {
 			this.game = game;
 			this.gui = gui;
@@ -133,6 +133,5 @@ public class Main {
 		public void playComplete(Player player) {
 			gui.update(game, player);
 		}
-		
 	}
 }

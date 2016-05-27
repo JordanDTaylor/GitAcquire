@@ -4,33 +4,33 @@ package halladay.acquire;
 public class Location implements Comparable<Location> {
 	private final int row;
 	private final int col;
-	
+
 	public Location(int row, int col) {
 		this.row = row;
 		this.col = col;
 	}
-	
+
 	public Location(char row, int col) {
 		this.row = Character.toLowerCase(row) - 'a';
 		this.col = col - 1;
 	}
-	
+
 	public int getRow() {
 		return this.row;
 	}
-	
+
 	public int getCol() {
 		return this.col;
 	}
-	
+
 	public String getDisplayRow() {
 		return Character.toString((char) (row + 'A'));
 	}
-	
+
 	public String getDisplayCol() {
 		return Integer.toString(col+1);
 	}
-	
+
 	public boolean isAdjacent(Location that) {
 		boolean isAbove = (that.row == this.row-1) && (this.col == that.col);
 		boolean isBelow = (that.row == this.row+1) && (this.col == that.col);
@@ -59,14 +59,12 @@ public class Location implements Comparable<Location> {
 		Location other = (Location) obj;
 		if (col != other.col)
 			return false;
-		if (row != other.row)
-			return false;
-		return true;
+		return row == other.row;
 	}
 
 	@Override
 	public int compareTo(Location o) {
-		Location that = (Location) o;
+		Location that = o;
 		int result = that.col - this.col;
 		if (result == 0) result = that.row - this.row;
 		return result;
@@ -77,5 +75,5 @@ public class Location implements Comparable<Location> {
 		return "(" + (col + 1) +"," + Character.toString((char) (row + 'A'))+")";
 	}
 
-	
+
 }

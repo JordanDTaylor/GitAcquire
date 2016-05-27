@@ -3,15 +3,15 @@ package halladay.acquire;
 
 public class Hotel implements Comparable<Hotel>{
 	private final Location location;
-	
+
 	public Hotel(Location location) {
 		this.location = location;
 	}
-	
+
 	public Location getLocation() {
 		return location;
 	}
-	
+
 	public boolean isAdjacent(Hotel that) {
 		return this.location.isAdjacent(that.location);
 	}
@@ -44,7 +44,7 @@ public class Hotel implements Comparable<Hotel>{
 
 	@Override
 	public int compareTo(Hotel o) {
-		Hotel that = (Hotel) o;
+		Hotel that = o;
 		return location.compareTo(that.location);
 	}
 
@@ -52,6 +52,6 @@ public class Hotel implements Comparable<Hotel>{
 	public String toString() {
 		return location.toString();
 	}
-	
-	
+
+
 }

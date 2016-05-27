@@ -1,11 +1,7 @@
 package halladay.acquire;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Game {
 	public static final int STARTING_CASH = 6000;
@@ -16,15 +12,18 @@ public class Game {
 	private static final int SAFE_CHAIN_SIZE = 11;
 
 	TileContainer tiles = new TileContainer(N_ROWS, N_COLS);
-	List<Hotel> board = new ArrayList<Hotel>();
-	List<Hotel> dead = new ArrayList<Hotel>();
+	List<Hotel> board = new ArrayList<>();
+	List<Hotel> dead = new ArrayList<>();
+	HashMap<String, Integer> wins = new HashMap<>();
 
-	private TreeMap<Hotel, Player> startingOrder = new TreeMap<Hotel, Player>();
-	private ArrayList<Player> players = new ArrayList<Player>();
+	private TreeMap<Hotel, Player> startingOrder = new TreeMap<>();
+
+	private ArrayList<Player> players = new ArrayList<>();
+
 	private boolean isOver = false;
-	private ArrayList<Chain> activeChains = new ArrayList<Chain>();
+	private ArrayList<Chain> activeChains = new ArrayList<>();
 
-	private ArrayList<Listener> listeners = new ArrayList<Listener>();
+	private ArrayList<Listener> listeners = new ArrayList<>();
 	private int delay = 0;
 	private boolean isPaused = false;
 
@@ -45,16 +44,15 @@ public class Game {
 	}
 
 	private void notifyListeners(Player current) {
-		for (Listener listener : listeners) {
-			listener.playComplete(current);
-		}
+		for (Listener listener : listeners) listener.playComplete(current);
 	}
 
 	public void addPlayer(Player player) {
 		Hotel hotel = tiles.getNextRandom();
 		startingOrder.put(hotel, player);
 		board.add(hotel);
-		System.out.println("Initial tile: "+hotel);
+		wins.put(player.name, 0);
+		Logger.GameMessageLog("Initial tile: "+hotel);
 	}
 
 	public void play() {
@@ -62,7 +60,7 @@ public class Game {
 		while (!isOver) {
 			Player current = players.remove(0);
 			players.add(current);
-			System.out.println("Playing "+current);
+			Logger.GameMessageLog("Playing "+current);
 			current.play(this);
 			notifyListeners(current);
 			try {
@@ -75,14 +73,11 @@ public class Game {
 			}
 		}
 		calculateScores();
-		players.sort(new Comparator<Player>() {
-			public int compare(Player p1, Player p2) {
-				return p1.getCash() - p2.getCash();
-			}
-		});
-
+		players.sort((p1, p2) -> p1.getCash() - p2.getCash());
+		Player winner = players.get(0);
+		System.out.println(winner.name + " won.");
 	}
-	
+
 	public void scorePlayers(HashMap<String, Integer> playerScores) {
 		int score = 0;
 		for (Player p : players) {
@@ -110,22 +105,20 @@ public class Game {
 	private void calculateScores() {
 		for (Chain c : activeChains) {
 			awardBonuses(c);
-			for (Player p : players) {
-				p.cashOut(c);
-			}
+			for (Player p : players) p.cashOut(c);
 		}
 	}
 
 	private void awardBonuses(Chain c) {
 		ChainType t = c.getType();
 
-		ArrayList<Player> first = new ArrayList<Player>();
-		ArrayList<Player> second = new ArrayList<Player>();
+		ArrayList<Player> first = new ArrayList<>();
+		ArrayList<Player> second = new ArrayList<>();
 
 		for (Player p : players) {
 			if ((first.size() == 0) || (p.getStockSharesCount(t) > first.get(0).getStockSharesCount(t))) {
 				second = first;
-				first = new ArrayList<Player>();
+				first = new ArrayList<>();
 				first.add(p);
 			} else if (p.getStockSharesCount(t) == first.get(0).getStockSharesCount(t)) {
 				first.add(p);
@@ -140,16 +133,10 @@ public class Game {
 		if ((second.size() == 0) || (first.size() > 0)) {
 			int amount = t.getFirstBonus(hotelCount) + t.getSecondBonus(hotelCount);
 			amount /= first.size();
-			for (Player p : first) {
-				p.addCashBonus(amount);
-			}
+			for (Player p : first) p.addCashBonus(amount);
 		} else {
-			for (Player p : first) {
-				p.addCashBonus(t.getFirstBonus(hotelCount));
-			}
-			for (Player p : second) {
-				p.addCashBonus(t.getSecondBonus(hotelCount));
-			}
+			for (Player p : first) p.addCashBonus(t.getFirstBonus(hotelCount));
+			for (Player p : second) p.addCashBonus(t.getSecondBonus(hotelCount));
 		}
 	}
 
@@ -214,7 +201,7 @@ public class Game {
 			}
 		}
 		activeChains.add(chain);
-		System.out.println("Starting chain: "+chain.getType());
+		Logger.GameMessageLog("Starting chain: "+chain.getType());
 	}
 
 	public List<Chain> getActiveChains() {
@@ -226,7 +213,7 @@ public class Game {
 	}
 
 	public List<ChainType> getStartableChains() {
-		List<ChainType> startable = new ArrayList<ChainType>();
+		List<ChainType> startable = new ArrayList<>();
 		for (ChainType typ : ChainType.values()) startable.add(typ);
 
 		for (Chain c : activeChains) {
@@ -257,26 +244,19 @@ public class Game {
 	private void recursiveAdd(Hotel tile, Chain chain) { // This has got to be slow - should have used a 2D array for the board - Chase was wrong
 		if (!chain.contains(tile)) {
 			chain.add(tile);
-			for (Hotel h : board) {
-				if (tile.isAdjacent(h)) {
-					recursiveAdd(h, chain);
-				}
-			}
+			board.stream().filter(h -> tile.isAdjacent(h)).forEach(h -> recursiveAdd(h, chain));
 		}
 	}
 
 	public List<Chain> getConnections(Hotel tile) {
-		ArrayList<Chain> connections = new ArrayList<Chain>();
-		for (Chain c : activeChains) {
-			if (c.connectsTo(tile)) {
-				connections.add(c);
-			}
-		}
+		ArrayList<Chain> connections = activeChains.stream()
+				.filter(c -> c.connectsTo(tile))
+				.collect(Collectors.toCollection(ArrayList::new));
 		return connections;
 	}
 
 	private List<Chain> getLargestChains(List<Chain> list) {
-		ArrayList<Chain> largest = new ArrayList<Chain>();
+		ArrayList<Chain> largest = new ArrayList<>();
 		for (Chain c : list) {
 			if ((largest.size() == 0) || (c.getHotelCount() > largest.get(0).getHotelCount())) {
 				largest.clear();
@@ -289,19 +269,18 @@ public class Game {
 	}
 
 	private void workOutMerger(Chain winner, List<Chain> mergers, Player mergingPlayer) {
-		System.out.println("Merging "+winner.getType()+" with:");
-		for (Chain c : mergers) System.out.println("\t"+c.getType());
+		Logger.GameMessageLog("Merging "+ winner.getType()+" with:");
+		for (Chain c : mergers) Logger.GameMessageLog("\t"+c.getType());
 		List<Player> orderedPlayers = getOrderedPlayerList(mergingPlayer);
 		for (Player p : orderedPlayers) {
 			p.resolveMergedStock(winner, mergers);
 		}
 
-		for (Chain c : mergers) {
-			if (c != winner) {
-				winner.merge(c);
-				activeChains.remove(c);
-			}
-		}
+		mergers.stream().filter(c -> c != winner)
+				.forEach(c -> {
+					winner.merge(c);
+					activeChains.remove(c);
+				});
 	}
 
 	private List<Player> getOrderedPlayerList(Player startingPlayer) {
@@ -326,12 +305,11 @@ public class Game {
 	/////////////////////////////// End Player Interface Section
 
 	public void displayScores() {
-		for (Player p : players) {
-			System.out.println(p.getName() + ": " + p.getCash());
-		}
+		for (Player p : players)
+			Logger.GameMessageLog(p.getName() + ": " + p.getCash());
 	}
 
 	public interface Listener {
-		public void playComplete(Player player);
+		void playComplete(Player player);
 	}
 }

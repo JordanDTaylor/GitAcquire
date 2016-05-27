@@ -9,7 +9,7 @@ public class TileContainer implements Iterable<Hotel> {
 	
 	private static Random random = RandomFactory.getRandom();
 
-	private ArrayList<Hotel> tiles = new ArrayList<Hotel>();
+	private ArrayList<Hotel> tiles = new ArrayList<>();
 
 	public TileContainer() {
 	}
@@ -31,7 +31,7 @@ public class TileContainer implements Iterable<Hotel> {
 	}
 	
 	public List<Hotel> getNextNRandom(int amount) {
-		ArrayList<Hotel> list = new ArrayList<Hotel>();
+		ArrayList<Hotel> list = new ArrayList<>();
 		for (int i = 0; i < amount; i++) {
 			list.add(getNextRandom());
 		}

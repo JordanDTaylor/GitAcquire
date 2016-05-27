@@ -33,7 +33,7 @@ public abstract class Player {
 			this.tiles.add(h);
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public ArrayList<Hotel> getTiles() {
 		return (ArrayList<Hotel>) tiles.clone();
@@ -115,7 +115,7 @@ public abstract class Player {
 		count += amount;
 		stocks.put(chain, count);
 		chain.buyShares(amount);
-		System.out.println("bought "+amount+" share(s) of "+chain);
+		Logger.GameMessageLog("bought "+amount+" share(s) of "+chain);
 	}
 
 	@Override
@@ -132,5 +132,5 @@ public abstract class Player {
 		return s;
 	}
 
-	
+
 }

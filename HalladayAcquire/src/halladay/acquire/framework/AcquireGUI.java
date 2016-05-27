@@ -1,29 +1,16 @@
 package halladay.acquire.framework;
 
-import halladay.acquire.Chain;
-import halladay.acquire.ChainType;
-import halladay.acquire.Game;
-import halladay.acquire.Hotel;
-import halladay.acquire.Location;
-import halladay.acquire.Player;
+import halladay.acquire.*;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.MatteBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.border.Border;
-import javax.swing.border.MatteBorder;
 
 @SuppressWarnings("serial")
 public class AcquireGUI extends JFrame {
@@ -42,7 +29,7 @@ public class AcquireGUI extends JFrame {
 
 		playersPanel = new PlayersPanel(players);
 		add(playersPanel);
-		
+
 		controlPanel = new ControlPanel(game);
 		add(controlPanel);
 
@@ -99,7 +86,7 @@ public class AcquireGUI extends JFrame {
 
 	private static class PlayersPanel extends JPanel {
 
-		private ArrayList<PlayerPane> playerPanes = new ArrayList<PlayerPane>();
+		private ArrayList<PlayerPane> playerPanes = new ArrayList<>();
 
 		public PlayersPanel(ArrayList<Player> players) {
 			FlowLayout playersLayout = new FlowLayout();
@@ -121,7 +108,7 @@ public class AcquireGUI extends JFrame {
 	private static class CellPane extends JPanel {
 
 		private static final Color FILLED_COLOR = Color.DARK_GRAY;
-		private static HashMap<ChainType, Color> colorMap = new HashMap<ChainType, Color>();
+		private static HashMap<ChainType, Color> colorMap = new HashMap<>();
 		static {
 			colorMap.put(ChainType.AMERICAN, Color.BLUE);
 			colorMap.put(ChainType.CONTINENTAL, Color.CYAN);
@@ -155,7 +142,7 @@ public class AcquireGUI extends JFrame {
 	}
 
 	private static class PlayerPane extends JPanel {
-		
+
 		private static final int WIDTH = 200;
 		private static final int HEIGHT = 250;
 
@@ -171,13 +158,13 @@ public class AcquireGUI extends JFrame {
 
 			name = new JLabel(player.getName());
 			add(name);
-			
+
 			tiles = new JLabel(getTilesString(player.getTiles()));
 			add(tiles);
 
 			cash = new JLabel(getCashString(player.getCash()));
 			add(cash);
-			
+
 			ChainType[] chains = ChainType.values();
 			stocks = new JLabel[chains.length];
 			for (int i = 0; i < chains.length; i++) {
@@ -188,11 +175,11 @@ public class AcquireGUI extends JFrame {
 			Border border = new MatteBorder(1, 1, 1, 1, Color.GRAY);
 			setBorder(border);
 		}
-		
+
 		private String getCashString(int cash) {
 			return "++++++++++++ Cash: "+cash + " ++++++++++++";
 		}
-		
+
 		private String getTilesString(List<Hotel> tiles) {
 			String tilesString = "";
 			for (Hotel h : player.getTiles()) {
@@ -200,7 +187,7 @@ public class AcquireGUI extends JFrame {
 			}
 			return tilesString;
 		}
-		
+
 		private String getStockString(ChainType typ, int count) {
 			return typ.toString() + ": " + count;
 		}
@@ -224,14 +211,14 @@ public class AcquireGUI extends JFrame {
 			return new Dimension(WIDTH, HEIGHT);
 		}
 	}
-	
+
 	public static class ControlPanel extends JPanel implements ActionListener {
-		
+
 		private Game game;
 		private JButton pauseResumeButton;
 		private static final String PAUSE_STRING = "Pause";
 		private static final String RESUME_STRING = "Resume";
-		
+
 		public ControlPanel(Game game) {
 			this.game = game;
 			pauseResumeButton = new JButton("Pause");
