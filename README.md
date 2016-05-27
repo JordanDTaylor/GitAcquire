@@ -34,15 +34,15 @@ Early-Game
 
 - Diversify stocks while its cheap
 
-----------------------------------------------------------------------------------------------------
-Mid-Game
-----------------------------------------------------------------------------------------------------
-
-#### Signs of the Mid-Game
+#### Switching to the Mid-Game
 
 Either:
 - More than 3 chains have been created AND more than 20 tiles have been placed.
 - A chain is safe.
+
+----------------------------------------------------------------------------------------------------
+Mid-Game
+----------------------------------------------------------------------------------------------------
 
 #### General Strategy
 
@@ -56,22 +56,22 @@ Either:
 
 #### Merging
 
-- Consider trading
+- Consider trading up if it gets you towards the majority
 
 #### Stock Purchasing
 
 - Favor purchasing cheap stocks that are about to be expensive stocks
 - Favor being the majority stock holder
 
+#### Switching to the End-Game
+
+- There are more (or equal amount of) safe chains than non-safe chains.
+
 ----------------------------------------------------------------------------------------------------
 End-Game
 ----------------------------------------------------------------------------------------------------
 
 - Now we can generate all possible moves.
-
-#### Signs of the End-Game
-
-- There are more (or equal amount of) safe chains than non-safe chains.
 
 #### General Strategy
 
@@ -81,8 +81,16 @@ End-Game
 
 #### Tile Placement
 
+- If behind: create new chains
+- If ahead: secure position by growing your large chains
+
 #### Merging
 
+- Directly compare the merge choices and choose the option that gives you the most net value
+
 #### Stock Purchasing
+
+- 1-2 large chains: defend your position as a majority stock holder in large chains.
+- 2+ large chains: acquire enough stock in as many as you can to secure the second place bonus.
 
 ----------------------------------------------------------------------------------------------------
