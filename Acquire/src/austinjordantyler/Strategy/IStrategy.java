@@ -1,4 +1,4 @@
-package Strategy;
+package austinjordantyler.Strategy;
 
 import halladay.acquire.Chain;
 import halladay.acquire.Game;
