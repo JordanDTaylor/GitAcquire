@@ -5,23 +5,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SmartPlayer extends Player implements Game.Listener {
-    private IStrategy earlyGameStrategy;
-    private IStrategy midGameStrategy;
-    private IStrategy endGameStrategy;
-
     private IStrategy currentStrategy;
 
     private boolean isRegistered = false;
 
     private List<Player> players = new ArrayList<>();
 
-    public SmartPlayer(String name, int startingCash, IStrategy early, IStrategy mid, IStrategy end) {
+    public SmartPlayer(String name, int startingCash, IStrategy startingStrategy) {
         super(name, startingCash);
-        this.earlyGameStrategy = early;
-        this.midGameStrategy = mid;
-        this.endGameStrategy = end;
-
-        this.currentStrategy = early;
+        this.currentStrategy = startingStrategy;
     }
 
     @Override
@@ -71,7 +63,7 @@ public class SmartPlayer extends Player implements Game.Listener {
         return this.currentStrategy;
     }
 
-    public void setCurrentStrategy(IStrategy currentStrategy) {
-        this.currentStrategy = currentStrategy;
+    public void setCurrentStrategy(IStrategy strategy) {
+        this.currentStrategy = strategy;
     }
 }
