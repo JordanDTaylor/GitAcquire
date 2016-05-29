@@ -7,9 +7,9 @@ import halladay.acquire.Player;
 import java.util.List;
 
 public interface IStrategy {
-    void placeTile(Game game, List<Player> players);
-    void buyStock(Game game, List<Player> players);
-    void resolveMergedStock(Chain game, List<Chain> players, List<Player> playerList);
-    Chain selectWinner(List<Chain> chains, List<Player> players);
-    void endTurn(Player Player);
+    void placeTile(Game game, Player me, List<Player> otherPlayers);
+    void buyStock(Game game, Player me, List<Player> otherPlayers);
+    void resolveMergedStock(Chain winner, List<Chain> mergers, Player me, List<Player> otherPlayers);
+    Chain selectWinner(List<Chain> chains, Player me, List<Player> otherPlayers);
+    void endTurn(Player me);
 }

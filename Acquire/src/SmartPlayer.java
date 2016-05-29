@@ -9,7 +9,7 @@ public class SmartPlayer extends Player implements Game.Listener {
 
     private boolean isRegistered = false;
 
-    private List<Player> players = new ArrayList<>();
+    private List<Player> otherPlayers = new ArrayList<>();
 
     public SmartPlayer(String name, int startingCash, IStrategy startingStrategy) {
         super(name, startingCash);
@@ -23,8 +23,8 @@ public class SmartPlayer extends Player implements Game.Listener {
             this.isRegistered = true;
         }
 
-        this.currentStrategy.placeTile(game, this.players);
-        this.currentStrategy.buyStock(game, this.players);
+        this.currentStrategy.placeTile(game, this, this.otherPlayers);
+        this.currentStrategy.buyStock(game, this, this.otherPlayers);
 
         // Get next tile
         Hotel tile = game.getNextTile();
@@ -45,18 +45,19 @@ public class SmartPlayer extends Player implements Game.Listener {
 
     @Override
     public Chain selectWinner(List<Chain> chains) {
-        return this.currentStrategy.selectWinner(chains, this.players);
+        return this.currentStrategy.selectWinner(chains, this, this.otherPlayers);
     }
 
     @Override
     public void resolveMergedStock(Chain winner, List<Chain> mergers) {
-        this.currentStrategy.resolveMergedStock(winner, mergers, this.players);
+        this.currentStrategy.resolveMergedStock(winner, mergers, this, this.otherPlayers);
     }
 
     @Override
     public void playComplete(Player player) {
-        if (!this.players.contains(player))
-            this.players.add(player);
+        if (player != this && !this.otherPlayers.contains(player)) {
+            this.otherPlayers.add(player);
+        }
     }
 
     public IStrategy getCurrentStrategy() {
