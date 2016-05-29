@@ -9,42 +9,42 @@ public class SmartPlayer extends Player implements Game.Listener {
     private IStrategy midGameStrategy;
     private IStrategy endGameStrategy;
 
-
     private IStrategy currentStrategy;
 
+    private boolean isRegistered = false;
+
+    private List<Player> players = new ArrayList<>();
 
     public SmartPlayer(String name, int startingCash, IStrategy early, IStrategy mid, IStrategy end) {
         super(name, startingCash);
-        earlyGameStrategy = early;
-        midGameStrategy = mid;
-        endGameStrategy = end;
+        this.earlyGameStrategy = early;
+        this.midGameStrategy = mid;
+        this.endGameStrategy = end;
 
-        currentStrategy = early;
+        this.currentStrategy = early;
     }
-
-    boolean isRegistered = false;
 
     @Override
     public void play(Game game) {
-        if (!isRegistered) {
+        if (!this.isRegistered) {
             game.register(this);
-            isRegistered = true;
+            this.isRegistered = true;
         }
 
-        currentStrategy.placeTile(game, players);
-        currentStrategy.buyStock(game, players);
+        this.currentStrategy.placeTile(game, this.players);
+        this.currentStrategy.buyStock(game, this.players);
 
         // Get next tile
         Hotel tile = game.getNextTile();
-        tiles.add(tile);
+        this.tiles.add(tile);
 
         // Exchange unplayable tiles
-        exchangeUnplayableTiles(game);
+        this.exchangeUnplayableTiles(game);
 
-        if (game.isEndable() && isWinning(game)) {
+        if (game.isEndable() && this.isWinning(game)) {
             game.causeEnd();
         }
-        currentStrategy.endTurn(this);
+        this.currentStrategy.endTurn(this);
     }
 
     private boolean isWinning(Game game) {
@@ -53,21 +53,18 @@ public class SmartPlayer extends Player implements Game.Listener {
 
     @Override
     public Chain selectWinner(List<Chain> chains) {
-        return this.currentStrategy.selectWinner(chains, players);
-
+        return this.currentStrategy.selectWinner(chains, this.players);
     }
 
     @Override
     public void resolveMergedStock(Chain winner, List<Chain> mergers) {
-        this.currentStrategy.resolveMergedStock(winner, mergers, players);
+        this.currentStrategy.resolveMergedStock(winner, mergers, this.players);
     }
-
-    List<Player> players = new ArrayList<>();
 
     @Override
     public void playComplete(Player player) {
-        if (!players.contains(player))
-            players.add(player);
+        if (!this.players.contains(player))
+            this.players.add(player);
     }
 
     public IStrategy getCurrentStrategy() {
