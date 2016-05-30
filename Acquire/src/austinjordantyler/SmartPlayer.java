@@ -38,7 +38,7 @@ public class SmartPlayer extends Player implements Game.Listener {
         if (game.isEndable() && this.isWinning(game)) {
             game.causeEnd();
         }
-        this.currentStrategy.endTurn(this);
+        this.currentStrategy.endTurn(game, this);
     }
 
     private boolean isWinning(Game game) {
