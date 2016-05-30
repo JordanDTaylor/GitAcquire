@@ -42,9 +42,33 @@ public class MidGameStrategy implements IStrategy {
         game.placeTile(choice, me);
     }
 
+    /**
+     * Considers buying stock in largest chains first.
+     * Will not buy stock unless it puts him in the majority share holders spot.
+     */
     @Override
     public void buyStock(Game game, Player me, List<Player> otherPlayers) {
-        // TODO
+        int purchasesLeft = 3;
+        int cashToSpend = me.getCash();
+
+        // consider chains ordered by largest
+        for (Chain activeChain : game.getActiveChains().stream()
+                .sorted((c1, c2) -> -Integer.valueOf(c1.getHotelCount()).compareTo(c2.getHotelCount()))
+                .collect(Collectors.toList())) {
+            ChainType chainType = activeChain.getType();
+
+            int numToPurchase = 0;
+            int price = chainType.getStockPrice(activeChain.getHotelCount());
+            while (cashToSpend >= price // can afford stock
+                    && numToPurchase < purchasesLeft // allowed to buy stock
+                    && !PlayerUtils.willBeMajorityStockHolderAfterPurchasing(me, otherPlayers, chainType)) { // worth buying stock
+                numToPurchase += 1;
+                cashToSpend -= activeChain.getStockPrice();
+            }
+            if (numToPurchase > 0) {
+                me.buyStock(chainType, numToPurchase, activeChain.getStockPrice());
+            }
+        }
     }
 
     /**
