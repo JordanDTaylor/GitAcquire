@@ -7,6 +7,7 @@ import halladay.acquire.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BinaryOperator;
 
 /**
  * The general strategy is to prepare for the end game by owning majority stocks in the upcoming large chains.
