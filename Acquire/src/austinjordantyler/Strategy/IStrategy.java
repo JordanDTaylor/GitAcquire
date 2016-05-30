@@ -1,5 +1,6 @@
 package austinjordantyler.Strategy;
 
+import austinjordantyler.SmartPlayer;
 import halladay.acquire.Chain;
 import halladay.acquire.Game;
 import halladay.acquire.Player;
@@ -11,5 +12,5 @@ public interface IStrategy {
     void buyStock(Game game, Player me, List<Player> otherPlayers);
     void resolveMergedStock(Chain winner, List<Chain> mergers, Player me, List<Player> otherPlayers);
     Chain selectWinner(List<Chain> chains, Player me, List<Player> otherPlayers);
-    void endTurn(Player me);
+    void endTurn(Game game, SmartPlayer me);
 }
