@@ -1,11 +1,13 @@
 package austinjordantyler.Strategy;
 
 import austinjordantyler.PlayerUtils;
+import austinjordantyler.SmartPlayer;
 import austinjordantyler.TileUtils;
 import halladay.acquire.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BinaryOperator;
 
 /**
  * The general strategy is to prepare for the end game by owning majority stocks in the upcoming large chains.
@@ -147,7 +149,13 @@ public class MidGameStrategy implements IStrategy {
     }
 
     @Override
-    public void endTurn(Player Player) {
-
+    public void endTurn(Game game, SmartPlayer me) {
+        int numSafeChains = game.getActiveChains().stream()
+                .map(chain -> chain.isSafe() ? 0 : 1)
+                .reduce(0, (x, y) -> x + y);
+        int numNonSafeChains = game.getActiveChains().size() - numSafeChains;
+        if (numSafeChains >= numNonSafeChains) {
+            me.setCurrentStrategy(new EndGameStrategy());
+        }
     }
 }
