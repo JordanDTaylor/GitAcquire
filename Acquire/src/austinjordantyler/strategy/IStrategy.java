@@ -1,4 +1,4 @@
-package austinjordantyler.Strategy;
+package austinjordantyler.strategy;
 
 import austinjordantyler.SmartPlayer;
 import halladay.acquire.Chain;

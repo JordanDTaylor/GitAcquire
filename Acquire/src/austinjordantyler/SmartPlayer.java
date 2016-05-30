@@ -1,6 +1,6 @@
 package austinjordantyler;
 
-import austinjordantyler.Strategy.IStrategy;
+import austinjordantyler.strategy.IStrategy;
 import halladay.acquire.*;
 
 import java.util.ArrayList;
