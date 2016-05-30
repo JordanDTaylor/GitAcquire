@@ -42,6 +42,66 @@ public class MidGameStrategy implements IStrategy {
         game.placeTile(choice, me);
     }
 
+    @Override
+    public void buyStock(Game game, Player me, List<Player> otherPlayers) {
+        // TODO
+    }
+
+    /**
+     * Trades ALL stock if it reaches the majority. Otherwise sells. It does not hang onto inactive stocks right now.
+     */
+    @Override
+    public void resolveMergedStock(Chain winner, List<Chain> mergers, Player me, List<Player> otherPlayers) {
+        ChainType tradingTo = winner.getType();
+        List<ChainType> tradingFrom = mergers.stream()
+                .map(Chain::getType)
+                .collect(Collectors.toList());
+
+        boolean shouldTrade = PlayerUtils.willBeMajorityStockHolderAfterTrade(
+                me, otherPlayers, tradingFrom, tradingTo);
+        if (shouldTrade) {
+            // trade ALL stock into winner
+            for (ChainType defunct : tradingFrom) {
+                int numICanTrade = me.getStockSharesCount(defunct);
+                me.tradeStock(defunct, numICanTrade, tradingTo);
+            }
+        } else {
+            // sell ALL stock
+            for (ChainType defunct : tradingFrom) {
+                int numICanSell = me.getStockSharesCount(defunct);
+                me.sellStock(defunct, numICanSell, defunct.getStockPrice(1)); // TODO figure out this last param
+            }
+        }
+    }
+
+    /**
+     * Picks the one we have more stock in.
+     */
+    @Override
+    public Chain selectWinner(List<Chain> chains, Player me, List<Player> otherPlayers) {
+        Chain winner = null;
+        int highScoreStocks = 0;
+        for (Chain mergingChain : chains) {
+            int numStocks = me.getStockSharesCount(mergingChain.getType());
+            if (winner == null || numStocks > highScoreStocks) {
+                highScoreStocks = numStocks;
+                winner = mergingChain;
+            }
+        }
+        return winner;
+    }
+
+    @Override
+    public void endTurn(Game game, SmartPlayer me) {
+        int numSafeChains = game.getActiveChains().stream()
+                .map(chain -> chain.isSafe() ? 0 : 1)
+                .reduce(0, (x, y) -> x + y);
+        int numNonSafeChains = game.getActiveChains().size() - numSafeChains;
+        if (numSafeChains >= numNonSafeChains) {
+            me.setCurrentStrategy(new EndGameStrategy());
+        }
+    }
+
     private double scoreTile(Game game, Hotel tile, Player me, List<Player> otherPlayers) {
         double centerScore = this.getCenterScore(game, tile);
         double newChainScore = this.getNewChainScore(game, tile);
@@ -133,63 +193,4 @@ public class MidGameStrategy implements IStrategy {
         return score;
     }
 
-    @Override
-    public void buyStock(Game game, Player me, List<Player> otherPlayers) {
-        // TODO
-    }
-
-    /**
-     * Trades ALL stock if it reaches the majority. Otherwise sells. It does not hang onto inactive stocks right now.
-     */
-    @Override
-    public void resolveMergedStock(Chain winner, List<Chain> mergers, Player me, List<Player> otherPlayers) {
-        ChainType tradingTo = winner.getType();
-        List<ChainType> tradingFrom = mergers.stream()
-                .map(Chain::getType)
-                .collect(Collectors.toList());
-
-        boolean shouldTrade = PlayerUtils.willBeMajorityStockHolderAfterTrade(
-                me, otherPlayers, tradingFrom, tradingTo);
-        if (shouldTrade) {
-            // trade ALL stock into winner
-            for (ChainType defunct : tradingFrom) {
-                int numICanTrade = me.getStockSharesCount(defunct);
-                me.tradeStock(defunct, numICanTrade, tradingTo);
-            }
-        } else {
-            // sell ALL stock
-            for (ChainType defunct : tradingFrom) {
-                int numICanSell = me.getStockSharesCount(defunct);
-                me.sellStock(defunct, numICanSell, defunct.getStockPrice(1)); // TODO figure out this last param
-            }
-        }
-    }
-
-    /**
-     * Picks the one we have more stock in.
-     */
-    @Override
-    public Chain selectWinner(List<Chain> chains, Player me, List<Player> otherPlayers) {
-        Chain winner = null;
-        int highScoreStocks = 0;
-        for (Chain mergingChain : chains) {
-            int numStocks = me.getStockSharesCount(mergingChain.getType());
-            if (winner == null || numStocks > highScoreStocks) {
-                highScoreStocks = numStocks;
-                winner = mergingChain;
-            }
-        }
-        return winner;
-    }
-
-    @Override
-    public void endTurn(Game game, SmartPlayer me) {
-        int numSafeChains = game.getActiveChains().stream()
-                .map(chain -> chain.isSafe() ? 0 : 1)
-                .reduce(0, (x, y) -> x + y);
-        int numNonSafeChains = game.getActiveChains().size() - numSafeChains;
-        if (numSafeChains >= numNonSafeChains) {
-            me.setCurrentStrategy(new EndGameStrategy());
-        }
-    }
 }
