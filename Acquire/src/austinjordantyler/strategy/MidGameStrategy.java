@@ -7,7 +7,7 @@ import halladay.acquire.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BinaryOperator;
+import java.util.stream.Collectors;
 
 /**
  * The general strategy is to prepare for the end game by owning majority stocks in the upcoming large chains.
@@ -138,9 +138,31 @@ public class MidGameStrategy implements IStrategy {
 
     }
 
+    /**
+     * Trades ALL stock if it reaches the majority. Otherwise sells. It does not hang onto inactive stocks right now.
+     */
     @Override
     public void resolveMergedStock(Chain winner, List<Chain> mergers, Player me, List<Player> otherPlayers) {
+        ChainType tradingTo = winner.getType();
+        List<ChainType> tradingFrom = mergers.stream()
+                .map(Chain::getType)
+                .collect(Collectors.toList());
 
+        boolean shouldTrade = PlayerUtils.willBeMajorityStockHolderAfterTrade(
+                me, otherPlayers, tradingFrom, tradingTo);
+        if (shouldTrade) {
+            // trade ALL stock into winner
+            for (ChainType defunct : tradingFrom) {
+                int numICanTrade = me.getStockSharesCount(defunct);
+                me.tradeStock(defunct, numICanTrade, tradingTo);
+            }
+        } else {
+            // sell ALL stock
+            for (ChainType defunct : tradingFrom) {
+                int numICanSell = me.getStockSharesCount(defunct);
+                me.sellStock(defunct, numICanSell, defunct.getStockPrice(1)); // TODO figure out this last param
+            }
+        }
     }
 
     @Override
