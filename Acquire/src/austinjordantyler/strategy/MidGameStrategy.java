@@ -53,7 +53,7 @@ public class MidGameStrategy implements IStrategy {
     @Override
     public void resolveMergedStock(Chain winner, List<Chain> mergers, Player me, List<Player> otherPlayers) {
         ChainType tradingTo = winner.getType();
-        List<ChainType> tradingFrom = mergers.stream()
+        List<ChainType> tradingFrom = mergers.stream() // TODO does this include all chains? or only defunct
                 .map(Chain::getType)
                 .collect(Collectors.toList());
 
@@ -67,9 +67,9 @@ public class MidGameStrategy implements IStrategy {
             }
         } else {
             // sell ALL stock
-            for (ChainType defunct : tradingFrom) {
-                int numICanSell = me.getStockSharesCount(defunct);
-                me.sellStock(defunct, numICanSell, defunct.getStockPrice(1)); // TODO figure out this last param
+            for (Chain defunct : mergers) {
+                int numICanSell = me.getStockSharesCount(defunct.getType());
+                me.sellStock(defunct.getType(), numICanSell, defunct.getStockPrice());
             }
         }
     }
