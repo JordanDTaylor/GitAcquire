@@ -134,7 +134,7 @@ public class MidGameStrategy implements IStrategy {
 
     @Override
     public void buyStock(Game game, Player me, List<Player> otherPlayers) {
-
+        // TODO
     }
 
     @Override
@@ -142,9 +142,21 @@ public class MidGameStrategy implements IStrategy {
 
     }
 
+    /**
+     * Picks the one we have more stock in.
+     */
     @Override
     public Chain selectWinner(List<Chain> chains, Player me, List<Player> otherPlayers) {
-        return null;
+        Chain winner = null;
+        int highScoreStocks = 0;
+        for (Chain mergingChain : chains) {
+            int numStocks = me.getStockSharesCount(mergingChain.getType());
+            if (winner == null || numStocks > highScoreStocks) {
+                highScoreStocks = numStocks;
+                winner = mergingChain;
+            }
+        }
+        return winner;
     }
 
     @Override
