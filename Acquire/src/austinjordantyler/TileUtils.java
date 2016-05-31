@@ -17,7 +17,7 @@ public class TileUtils {
      * Returns the distance of a tile from the center of the board where 0.0 is the center.
      * The largest this number can be is equal to MAX_DISTANCE_FROM_CENTER.
      */
-    public static double tileDistanceFromCenter(Game game, Hotel tile) {
+    public static double tileDistanceFromCenter(Hotel tile) {
         Location center = new Location(Game.N_ROWS / 2, Game.N_COLS / 2);
         Location tileLocation = tile.getLocation();
         int xDistance = Math.abs(center.getCol() - tileLocation.getCol());

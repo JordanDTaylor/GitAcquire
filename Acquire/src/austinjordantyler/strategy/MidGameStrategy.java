@@ -134,7 +134,7 @@ public class MidGameStrategy implements IStrategy {
     }
 
     private double getCenterScore(Game game, Hotel tile) {
-        double score = TileUtils.MAX_DISTANCE_FROM_CENTER - TileUtils.tileDistanceFromCenter(game, tile);
+        double score = TileUtils.MAX_DISTANCE_FROM_CENTER - TileUtils.tileDistanceFromCenter(tile);
         return CENTER_WEIGHT * score;
     }
 
