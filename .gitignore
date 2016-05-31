@@ -47,3 +47,5 @@ fabric.properties
 Acquire/.idea/vcs.xml
 Acquire/.idea/workspace.xml
 Acquire/Acquire.iml
+Acquire/.idea/uiDesigner.xml
+Acquire/out/
