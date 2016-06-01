@@ -28,6 +28,7 @@ public class MidGameStrategy implements IStrategy {
     // - place towards the center
     @Override
     public void placeTile(Game game, SmartPlayer me, List<Player> otherPlayers) {
+        System.out.println("SMARTPLAYER: placing tile...");
         List<Hotel> myTiles = me.getTiles();
         double highScore = 0.0;
         Hotel choice = null;
@@ -52,6 +53,7 @@ public class MidGameStrategy implements IStrategy {
         int cashToSpend = me.getCash();
 
         // consider chains ordered by largest
+        System.out.println("NumChains: " + game.getActiveChains().size());
         for (Chain activeChain : game.getActiveChains().stream()
                 .sorted((c1, c2) -> -Integer.valueOf(c1.getHotelCount()).compareTo(c2.getHotelCount()))
                 .collect(Collectors.toList())) {
@@ -61,11 +63,12 @@ public class MidGameStrategy implements IStrategy {
             int price = chainType.getStockPrice(activeChain.getHotelCount());
             while (cashToSpend >= price // can afford stock
                     && numToPurchase < purchasesLeft // allowed to buy stock
-                    && !PlayerUtils.willBeMajorityStockHolderAfterPurchasing(me, otherPlayers, chainType)) { // worth buying stock
-                numToPurchase += 1;
+                    && PlayerUtils.willBeMajorityStockHolderWithXMoreShares(me, otherPlayers, chainType, purchasesLeft)) { // worth buying stock
+                numToPurchase += 1; // TODO make the above mean will _become_ majority stock holder
                 cashToSpend -= activeChain.getStockPrice();
             }
             if (numToPurchase > 0) {
+                System.out.println("SMARTPLAYER: Purchasing stocks " + numToPurchase + "x " + activeChain);
                 me.buyStock(chainType, numToPurchase, activeChain.getStockPrice());
             }
         }
@@ -87,7 +90,9 @@ public class MidGameStrategy implements IStrategy {
             // trade ALL stock into winner
             for (ChainType defunct : tradingFrom) {
                 int numICanTrade = me.getStockSharesCount(defunct);
-                me.tradeStock(defunct, numICanTrade, tradingTo);
+                if (numICanTrade > 0) {
+                    me.tradeStock(defunct, numICanTrade, tradingTo);
+                }
             }
         } else {
             // sell ALL stock
@@ -117,12 +122,13 @@ public class MidGameStrategy implements IStrategy {
 
     @Override
     public void endTurn(Game game, SmartPlayer me) {
-        int numSafeChains = game.getActiveChains().stream()
-                .map(chain -> chain.isSafe() ? 0 : 1)
-                .reduce(0, (x, y) -> x + y);
+        int numSafeChains = (int) game.getActiveChains().stream()
+                .filter(Chain::isSafe)
+                .count();
         int numNonSafeChains = game.getActiveChains().size() - numSafeChains;
-        if (numSafeChains >= numNonSafeChains) {
+        if (numSafeChains > numNonSafeChains) {
             me.setCurrentStrategy(new EndGameStrategy());
+            System.out.println("SMARTPLAYER: SWITCHING STRATEGY TO END GAME");
         }
     }
 
