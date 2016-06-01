@@ -61,6 +61,11 @@ public class SmartPlayer extends Player implements Game.Listener {
             this.otherPlayers.add(player);
         }
     }
+    
+    @Override
+    public void acquireStock(ChainType chain, int amount) {
+    	super.acquireStock(chain, amount);
+    }
 
     public IStrategy getCurrentStrategy() {
         return this.currentStrategy;
