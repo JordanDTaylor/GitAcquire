@@ -27,7 +27,7 @@ public class MidGameStrategy implements IStrategy {
     // - create new chains
     // - place towards the center
     @Override
-    public void placeTile(Game game, Player me, List<Player> otherPlayers) {
+    public void placeTile(Game game, SmartPlayer me, List<Player> otherPlayers) {
         List<Hotel> myTiles = me.getTiles();
         double highScore = 0.0;
         Hotel choice = null;
@@ -38,8 +38,8 @@ public class MidGameStrategy implements IStrategy {
                 choice = tile;
             }
         }
-
-        game.placeTile(choice, me);
+        System.out.println("SMARTPLAYER: placing tile: " + choice.getLocation());
+        TileUtils.placeTile(game, me, choice);
     }
 
     /**
@@ -47,7 +47,7 @@ public class MidGameStrategy implements IStrategy {
      * Will not buy stock unless it puts him in the majority share holders spot.
      */
     @Override
-    public void buyStock(Game game, Player me, List<Player> otherPlayers) {
+    public void buyStock(Game game, SmartPlayer me, List<Player> otherPlayers) {
         int purchasesLeft = 3;
         int cashToSpend = me.getCash();
 
@@ -75,7 +75,7 @@ public class MidGameStrategy implements IStrategy {
      * Trades ALL stock if it reaches the majority. Otherwise sells. It does not hang onto inactive stocks right now.
      */
     @Override
-    public void resolveMergedStock(Chain winner, List<Chain> mergers, Player me, List<Player> otherPlayers) {
+    public void resolveMergedStock(Chain winner, List<Chain> mergers, SmartPlayer me, List<Player> otherPlayers) {
         ChainType tradingTo = winner.getType();
         List<ChainType> tradingFrom = mergers.stream() // TODO does this include all chains? or only defunct
                 .map(Chain::getType)
@@ -102,7 +102,7 @@ public class MidGameStrategy implements IStrategy {
      * Picks the one we have more stock in.
      */
     @Override
-    public Chain selectWinner(List<Chain> chains, Player me, List<Player> otherPlayers) {
+    public Chain selectWinner(List<Chain> chains, SmartPlayer me, List<Player> otherPlayers) {
         Chain winner = null;
         int highScoreStocks = 0;
         for (Chain mergingChain : chains) {
@@ -126,7 +126,7 @@ public class MidGameStrategy implements IStrategy {
         }
     }
 
-    private double scoreTile(Game game, Hotel tile, Player me, List<Player> otherPlayers) {
+    private double scoreTile(Game game, Hotel tile, SmartPlayer me, List<Player> otherPlayers) {
         double centerScore = this.getCenterScore(game, tile);
         double newChainScore = this.getNewChainScore(game, tile);
         double growthScore = this.getChainGrowthScore(game, tile, me, otherPlayers);
@@ -134,7 +134,7 @@ public class MidGameStrategy implements IStrategy {
     }
 
     private double getCenterScore(Game game, Hotel tile) {
-        double score = TileUtils.MAX_DISTANCE_FROM_CENTER - TileUtils.tileDistanceFromCenter(game, tile);
+        double score = TileUtils.MAX_DISTANCE_FROM_CENTER - TileUtils.tileDistanceFromCenter(tile);
         return CENTER_WEIGHT * score;
     }
 
@@ -163,7 +163,7 @@ public class MidGameStrategy implements IStrategy {
      * merging chain, we lose but trade/sell stocks => MERGE_CHAIN_WEIGHT
      * merging chain, we win the merge => GROW_CHAIN_WEIGHT + MERGE_CHAIN_WEIGHT
      */
-    private double getChainGrowthScore(Game game, Hotel tile, Player me, List<Player> otherPlayers) {
+    private double getChainGrowthScore(Game game, Hotel tile, SmartPlayer me, List<Player> otherPlayers) {
         double score = 0.0;
         List<Chain> connectingChains = game.getConnections(tile);
         if (connectingChains.size() > 0) {

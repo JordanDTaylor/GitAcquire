@@ -9,22 +9,22 @@ import java.util.List;
 
 public class EndGameStrategy implements IStrategy {
     @Override
-    public void placeTile(Game game, Player me, List<Player> otherPlayers) {
+    public void placeTile(Game game, SmartPlayer me, List<Player> otherPlayers) {
 
     }
 
     @Override
-    public void buyStock(Game game, Player me, List<Player> otherPlayers) {
+    public void buyStock(Game game, SmartPlayer me, List<Player> otherPlayers) {
 
     }
 
     @Override
-    public void resolveMergedStock(Chain winner, List<Chain> mergers, Player me, List<Player> otherPlayers) {
+    public void resolveMergedStock(Chain winner, List<Chain> mergers, SmartPlayer me, List<Player> otherPlayers) {
 
     }
 
     @Override
-    public Chain selectWinner(List<Chain> chains, Player me, List<Player> otherPlayers) {
+    public Chain selectWinner(List<Chain> chains, SmartPlayer me, List<Player> otherPlayers) {
         return null;
     }
 
