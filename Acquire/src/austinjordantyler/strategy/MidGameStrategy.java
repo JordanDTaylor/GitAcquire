@@ -28,7 +28,6 @@ public class MidGameStrategy implements IStrategy {
     // - place towards the center
     @Override
     public void placeTile(Game game, SmartPlayer me, List<Player> otherPlayers) {
-        System.out.println("SMARTPLAYER: placing tile...");
         List<Hotel> myTiles = me.getTiles();
         double highScore = 0.0;
         Hotel choice = null;
@@ -39,7 +38,6 @@ public class MidGameStrategy implements IStrategy {
                 choice = tile;
             }
         }
-        System.out.println("SMARTPLAYER: placing tile: " + choice.getLocation());
         TileUtils.placeTile(game, me, choice);
     }
 
@@ -53,7 +51,6 @@ public class MidGameStrategy implements IStrategy {
         int cashToSpend = me.getCash();
 
         // consider chains ordered by largest
-        System.out.println("NumChains: " + game.getActiveChains().size());
         for (Chain activeChain : game.getActiveChains().stream()
                 .sorted((c1, c2) -> -Integer.valueOf(c1.getHotelCount()).compareTo(c2.getHotelCount()))
                 .collect(Collectors.toList())) {
@@ -68,7 +65,6 @@ public class MidGameStrategy implements IStrategy {
                 cashToSpend -= activeChain.getStockPrice();
             }
             if (numToPurchase > 0) {
-                System.out.println("SMARTPLAYER: Purchasing stocks " + numToPurchase + "x " + activeChain);
                 me.buyStock(chainType, numToPurchase, activeChain.getStockPrice());
             }
         }
@@ -98,7 +94,9 @@ public class MidGameStrategy implements IStrategy {
             // sell ALL stock
             for (Chain defunct : mergers) {
                 int numICanSell = me.getStockSharesCount(defunct.getType());
-                me.sellStock(defunct.getType(), numICanSell, defunct.getStockPrice());
+                if (numICanSell > 0) {
+                    me.sellStock(defunct.getType(), numICanSell, defunct.getStockPrice());
+                }
             }
         }
     }
