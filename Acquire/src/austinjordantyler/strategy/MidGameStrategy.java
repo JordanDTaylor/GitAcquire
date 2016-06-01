@@ -122,7 +122,7 @@ public class MidGameStrategy implements IStrategy {
                 .reduce(0, (x, y) -> x + y);
         int numNonSafeChains = game.getActiveChains().size() - numSafeChains;
         if (numSafeChains >= numNonSafeChains) {
-            me.setCurrentStrategy(new EndGameStrategy());
+            //me.setCurrentStrategy(new EndGameStrategy());
         }
     }
 

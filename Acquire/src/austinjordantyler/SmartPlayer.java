@@ -42,7 +42,7 @@ public class SmartPlayer extends Player implements Game.Listener {
     }
 
     private boolean isWinning(Game game) {
-        return false;
+        return true;
     }
 
     @Override
@@ -61,6 +61,11 @@ public class SmartPlayer extends Player implements Game.Listener {
             this.otherPlayers.add(player);
         }
     }
+    
+    @Override
+    public void acquireStock(ChainType chain, int amount) {
+    	super.acquireStock(chain, amount);
+    }
 
     public IStrategy getCurrentStrategy() {
         return this.currentStrategy;
@@ -68,5 +73,9 @@ public class SmartPlayer extends Player implements Game.Listener {
 
     public void setCurrentStrategy(IStrategy strategy) {
         this.currentStrategy = strategy;
+    }
+    
+    public void removeTile(Hotel tileToRemove){
+    	tiles.remove(tileToRemove);
     }
 }
