@@ -20,12 +20,15 @@ public class SmartPlayer extends Player implements Game.Listener {
 
     @Override
     public void play(Game game) {
+        System.out.println("SMARTPLAYER: taking turn");
         if (!this.isRegistered) {
             game.register(this);
             this.isRegistered = true;
         }
 
+        System.out.println("SMARTPLAYER: placing tile");
         this.currentStrategy.placeTile(game, this, this.otherPlayers);
+        System.out.println("SMARTPLAYER: buying stock");
         this.currentStrategy.buyStock(game, this, this.otherPlayers);
 
         // Get next tile
@@ -65,6 +68,10 @@ public class SmartPlayer extends Player implements Game.Listener {
     @Override
     public void acquireStock(ChainType chain, int amount) {
     	super.acquireStock(chain, amount);
+    }
+
+    public void removeTile(Hotel tile) {
+        super.tiles.remove(tile);
     }
 
     public IStrategy getCurrentStrategy() {

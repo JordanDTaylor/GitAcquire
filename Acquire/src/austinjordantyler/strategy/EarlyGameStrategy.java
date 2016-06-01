@@ -14,14 +14,12 @@ import java.util.Collections;
 import java.util.List;
 
 public class EarlyGameStrategy implements IStrategy {
-	
-	
     @Override
-    public void placeTile(Game game, Player me, List<Player> otherPlayers) {
+    public void placeTile(Game game, SmartPlayer me, List<Player> otherPlayers) {
         List<Hotel> tiles = me.getTiles();
         
         //sorts the tiles by their distance to center to guarantee closes center placement
-        tiles.sort((x,y) -> (int)TileUtils.tileDistanceFromCenter(game, x) - (int)TileUtils.tileDistanceFromCenter(game, y));
+        tiles.sort((x,y) -> (int)TileUtils.tileDistanceFromCenter(x) - (int)TileUtils.tileDistanceFromCenter(y));
         
         //If we can create a chain, we do it  No matter what
     	if (game.getStartableChains().size() > 0){
@@ -36,11 +34,9 @@ public class EarlyGameStrategy implements IStrategy {
 
     	//At this point we know we cant create a new chain so we must get the closest to the center
 		game.placeTile(tiles.get(0), me);
-		
-
     }
 
-	private void startChain(Game game, Hotel closestTile, Player me) {
+	private void startChain(Game game, Hotel closestTile, SmartPlayer me) {
 		List<ChainType> types = game.getStartableChains();
 		ChainType bestType = types.get(0);
 		for(ChainType type : types){
@@ -51,12 +47,12 @@ public class EarlyGameStrategy implements IStrategy {
 		game.startChain(bestType, closestTile);
 		if (bestType.getOutstandingSharesCount() > 1) {
 			//obtains initial stock
-			((SmartPlayer)me).acquireStock(bestType, 1);
+			me.acquireStock(bestType, 1);
 		}
 	}
 
 	@Override
-    public void buyStock(Game game, Player me, List<Player> otherPlayers) {
+    public void buyStock(Game game, SmartPlayer me, List<Player> otherPlayers) {
 		//this gets all available chain types in order of value
 		List<ChainType> availableTypes = new ArrayList<>();
 		game.getActiveChains().stream().map((chain) -> chain.getType()).sorted((x,y) -> x.getStockPrice(1)).forEach((type) -> availableTypes.add(type));
@@ -68,7 +64,6 @@ public class EarlyGameStrategy implements IStrategy {
 
 		//determine most valuable triple and double buys and three best single buys
 		selectBestStockOption(me, options);
-		
     }
 
 	private List<Option> calculateCurrentStockOptions(Player me, List<Player> otherPlayers,
@@ -169,7 +164,7 @@ public class EarlyGameStrategy implements IStrategy {
 	}
 
     @Override
-    public void resolveMergedStock(Chain winner, List<Chain> mergers, Player me, List<Player> otherPlayers) {
+    public void resolveMergedStock(Chain winner, List<Chain> mergers, SmartPlayer me, List<Player> otherPlayers) {
     	//Calculate everyone's stock in the winner
 		int majorityAmount = 0;
 		int minorityAmount = 0;
@@ -220,7 +215,7 @@ public class EarlyGameStrategy implements IStrategy {
 	}
 
     @Override
-    public Chain selectWinner(List<Chain> chains, Player me, List<Player> otherPlayers) {
+    public Chain selectWinner(List<Chain> chains, SmartPlayer me, List<Player> otherPlayers) {
     	//Just select the winner as the one where we have the most stocks in
     	//Yes I stole this from tyler.
         Chain winner = null;

@@ -1,12 +1,10 @@
 package austinjordantyler;
 
-import halladay.acquire.Chain;
-import halladay.acquire.Game;
-import halladay.acquire.Hotel;
-import halladay.acquire.Location;
+import halladay.acquire.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class TileUtils {
@@ -35,6 +33,9 @@ public class TileUtils {
         return chainTiles;
     }
 
+    /**
+     * Gets the tiles which have no affiliation that connect to the tile.
+     */
     public static List<Hotel> getConnectingLoneTiles(Game game, Hotel tile) {
         return getLoneTiles(game).stream()
                 .filter(loneTile -> loneTile.isAdjacent(tile))
@@ -45,5 +46,30 @@ public class TileUtils {
         return game.getPlayedTiles().stream()
                 .filter(playedTile -> game.getAffiliation(playedTile) == null)
                 .collect(Collectors.toList());
+    }
+
+    public static boolean tileWouldStartChain(Game game, Hotel tile) {
+        return getConnectingLoneTiles(game, tile).size() > 0
+                && game.getConnections(tile).size() == 0;
+    }
+
+    public static void placeTile(Game game, SmartPlayer me, Hotel tile) {
+        game.placeTile(tile, me);
+        me.removeTile(tile);
+
+        if (tileWouldStartChain(game, tile)) {
+            List<ChainType> startableChains = game.getStartableChains();
+            Optional<ChainType> chainTypeOptional = startableChains.stream().max(
+                    (chain1, chain2) ->
+                            Integer.valueOf(chain1.getStockPrice(chain1.getOutstandingSharesCount()))
+                                    .compareTo(chain2.getStockPrice(chain2.getOutstandingSharesCount())));
+            if (chainTypeOptional.isPresent()) {
+                ChainType chainType = chainTypeOptional.get();
+                game.startChain(chainType, tile);
+                if (chainType.getOutstandingSharesCount() > 1) {
+                    me.acquireStock(chainType, 1);
+                }
+            }
+        }
     }
 }
