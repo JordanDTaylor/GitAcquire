@@ -16,15 +16,15 @@ public class Game {
 	private static final int SAFE_CHAIN_SIZE = 11;
 
 	TileContainer tiles = new TileContainer(N_ROWS, N_COLS);
-	List<Hotel> board = new ArrayList<Hotel>();
-	List<Hotel> dead = new ArrayList<Hotel>();
+	List<Hotel> board = new ArrayList<>();
+	List<Hotel> dead = new ArrayList<>();
 
-	private TreeMap<Hotel, Player> startingOrder = new TreeMap<Hotel, Player>();
-	private ArrayList<Player> players = new ArrayList<Player>();
+	private TreeMap<Hotel, Player> startingOrder = new TreeMap<>();
+	private ArrayList<Player> players = new ArrayList<>();
 	private boolean isOver = false;
-	private ArrayList<Chain> activeChains = new ArrayList<Chain>();
+	private ArrayList<Chain> activeChains = new ArrayList<>();
 
-	private ArrayList<Listener> listeners = new ArrayList<Listener>();
+	private ArrayList<Listener> listeners = new ArrayList<>();
 	private int delay = 0;
 	private boolean isPaused = false;
 
@@ -119,13 +119,13 @@ public class Game {
 	private void awardBonuses(Chain c) {
 		ChainType t = c.getType();
 
-		ArrayList<Player> first = new ArrayList<Player>();
-		ArrayList<Player> second = new ArrayList<Player>();
+		ArrayList<Player> first = new ArrayList<>();
+		ArrayList<Player> second = new ArrayList<>();
 
 		for (Player p : players) {
 			if ((first.size() == 0) || (p.getStockSharesCount(t) > first.get(0).getStockSharesCount(t))) {
 				second = first;
-				first = new ArrayList<Player>();
+				first = new ArrayList<>();
 				first.add(p);
 			} else if (p.getStockSharesCount(t) == first.get(0).getStockSharesCount(t)) {
 				first.add(p);
@@ -226,12 +226,14 @@ public class Game {
 	}
 
 	public List<ChainType> getStartableChains() {
-		List<ChainType> startable = new ArrayList<ChainType>();
-		for (ChainType typ : ChainType.values()) startable.add(typ);
+		List<ChainType> startable = new ArrayList<>();
 
-		for (Chain c : activeChains) {
+		for (ChainType typ : ChainType.values())
+			startable.add(typ);
+
+		for (Chain c : activeChains)
 			startable.remove(c.getType());
-		}
+
 		return startable;
 	}
 
@@ -266,7 +268,7 @@ public class Game {
 	}
 
 	public List<Chain> getConnections(Hotel tile) {
-		ArrayList<Chain> connections = new ArrayList<Chain>();
+		ArrayList<Chain> connections = new ArrayList<>();
 		for (Chain c : activeChains) {
 			if (c.connectsTo(tile)) {
 				connections.add(c);
@@ -276,7 +278,7 @@ public class Game {
 	}
 
 	private List<Chain> getLargestChains(List<Chain> list) {
-		ArrayList<Chain> largest = new ArrayList<Chain>();
+		ArrayList<Chain> largest = new ArrayList<>();
 		for (Chain c : list) {
 			if ((largest.size() == 0) || (c.getHotelCount() > largest.get(0).getHotelCount())) {
 				largest.clear();

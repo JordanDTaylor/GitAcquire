@@ -100,7 +100,7 @@ public abstract class Player {
 	}
 
 	protected void releaseStock(ChainType chain, int amount) {
-		chain.sellShares(amount);
+//		chain.sellShares(amount);
 		int count = stocks.get(chain);
 		count -= amount;
 		stocks.put(chain, count);
