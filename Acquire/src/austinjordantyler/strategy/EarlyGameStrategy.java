@@ -9,7 +9,6 @@ import halladay.acquire.Hotel;
 import halladay.acquire.Player;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,6 +25,7 @@ public class EarlyGameStrategy implements IStrategy {
     		for(Hotel tile : tiles){
             	if(TileUtils.getConnectingLoneTiles(game, tile).size() > 0) {
             		game.placeTile(tile, me);
+            		((SmartPlayer)me).removeTile(tile);
             		startChain(game, tile, me);
             		return;
             	}
@@ -34,26 +34,32 @@ public class EarlyGameStrategy implements IStrategy {
 
     	//At this point we know we cant create a new chain so we must get the closest to the center
 		game.placeTile(tiles.get(0), me);
+		((SmartPlayer)me).removeTile(tiles.get(0));
     }
 
 	private void startChain(Game game, Hotel closestTile, SmartPlayer me) {
 		List<ChainType> types = game.getStartableChains();
+		ChainType bestType = getMostValuableChainType(types);
+		game.startChain(bestType, closestTile);
+		if (bestType.getOutstandingSharesCount() > 1) {	
+			me.acquireStock(bestType, 1);			//obtains initial stock
+		}
+	}
+
+	private ChainType getMostValuableChainType(List<ChainType> types) {
 		ChainType bestType = types.get(0);
 		for(ChainType type : types){
 			if(type.getStockPrice(2) > bestType.getStockPrice(2)){
 				bestType = type;
 			}
 		}
-		game.startChain(bestType, closestTile);
-		if (bestType.getOutstandingSharesCount() > 1) {
-			//obtains initial stock
-			me.acquireStock(bestType, 1);
-		}
+		return bestType;
 	}
 
 	@Override
     public void buyStock(Game game, SmartPlayer me, List<Player> otherPlayers) {
 		//this gets all available chain types in order of value
+		//
 		List<ChainType> availableTypes = new ArrayList<>();
 		game.getActiveChains().stream().map((chain) -> chain.getType()).sorted((x,y) -> x.getStockPrice(1)).forEach((type) -> availableTypes.add(type));
 		
@@ -66,8 +72,7 @@ public class EarlyGameStrategy implements IStrategy {
 		selectBestStockOption(me, options);
     }
 
-	private List<Option> calculateCurrentStockOptions(Player me, List<Player> otherPlayers,
-			List<ChainType> availableTypes) {
+	private List<Option> calculateCurrentStockOptions(Player me, List<Player> otherPlayers, List<ChainType> availableTypes) {
 		List<Option> options = new ArrayList<>();
 		
 		for(ChainType type : availableTypes){
@@ -108,6 +113,9 @@ public class EarlyGameStrategy implements IStrategy {
 	}
 
 	private void selectBestStockOption(Player me, List<Option> options) {
+		if(options.size() == 0){
+			return;
+		}
 		//Sort the stocks and determine the best 3, 21, and 111 combos
 		Collections.sort(options);
 		Option three = null;
@@ -115,7 +123,7 @@ public class EarlyGameStrategy implements IStrategy {
 		List<Option> ones = new ArrayList<>();
 		
 		for(Option option : options){
-			if(option.getAmountToBuy() == 3 && three == null){
+			if(option.getAmountToBuy() == 3 && three == null && me.getCash() > costOf(option) * 3){
 				three = option;
 			}else if(option.getAmountToBuy() == 2 && two == null){
 				two = option;
@@ -126,17 +134,25 @@ public class EarlyGameStrategy implements IStrategy {
 		
 		//select the stocks to buy with the best total cost:value that fits in with the available stock to buy
 		
-		Option[] onesArray = ones.toArray(new Option[3]);
+		Option[] onesArray = ones.toArray(new Option[0]);
 		
-		if(costValue(three) > costValue(two, ones.get(0)) && costValue(three) > costValue(onesArray)){
+		if(costValue(three) > costValue(two, ones.get(0)) && costValue(three) > costValue(onesArray) && me.getCash() > costOf(three) * 3){
 			buyStocks(me, three);
-		}else if(costValue(two, ones.get(0)) > costValue(onesArray)){
+		}else if(costValue(two, ones.get(0)) > costValue(onesArray) && me.getCash() > costOf(two, two, ones.get(0))){
 			buyStocks(me, two, ones.get(0));
-		}else{
+		}else if(me.getCash() > costOf(onesArray)){
 			buyStocks(me, onesArray);
 		}
 	}
 	
+	private int costOf(Option... options) {
+		int totalCost = 0;
+		for(Option o : options){
+			totalCost += o.getCostOfShare();
+		}
+		return totalCost;
+	}
+
 	private void buyStocks(Player me, Option... options){
 		for(Option i : options){
 			me.buyStock(i.getType(), i.getAmountToBuy(), i.getCostOfShare());
@@ -144,9 +160,14 @@ public class EarlyGameStrategy implements IStrategy {
 	}
 	
 	private double costValue(Option... options){
+		if(options == null){
+			return 0;
+		}
 		double totalCostValue = 0;
 		for(Option option : options){
-			totalCostValue += option.costValue();
+			if(option != null){
+				totalCostValue += option.costValue();
+			}
 		}
 		return totalCostValue;
 	}
@@ -154,17 +175,20 @@ public class EarlyGameStrategy implements IStrategy {
 	private int determineValue(ChainType type, int totalStockBought, int majorityAmount, int minorityAmount, int myStocks, int amountToBuy) {
 		int secondBonus = type.getSecondBonus(totalStockBought + amountToBuy);
 		int value = 0;
-		if(myStocks < majorityAmount && myStocks > majorityAmount - amountToBuy || myStocks < minorityAmount && myStocks > minorityAmount - amountToBuy){
+		if(myStocks < majorityAmount && myStocks > majorityAmount - amountToBuy || myStocks == minorityAmount){
 			value = secondBonus / 2;
+		}else if(myStocks < minorityAmount && myStocks > minorityAmount - amountToBuy){
+			value = secondBonus;
 		}
 		
-		value += type.getStockPrice(totalStockBought + amountToBuy) - type.getStockPrice(totalStockBought);
+		value += type.getStockPrice(totalStockBought + amountToBuy);
 		
 		return value;
 	}
 
     @Override
     public void resolveMergedStock(Chain winner, List<Chain> mergers, SmartPlayer me, List<Player> otherPlayers) {
+    	mergers.remove(winner);
     	//Calculate everyone's stock in the winner
 		int majorityAmount = 0;
 		int minorityAmount = 0;
@@ -186,11 +210,11 @@ public class EarlyGameStrategy implements IStrategy {
 		
 		//trade if we can gain a stock status
 		if(stocksForMajority == 0 && availableStocks > 2){
-		    me.tradeStock(mergers.get(0).getType(), 2, winner.getType());
+			tradeOne(winner, mergers, me);
 		}else if(stocksForMajority < availableStocks / 2){
             tradeAll(winner, mergers, me);
 		}else if(stocksForMinority == 0 && availableStocks > 2){
-		    me.tradeStock(mergers.get(0).getType(), 2, winner.getType());
+			tradeOne(winner, mergers, me);
 		}else if(stocksForMinority < availableStocks / 2){
             tradeAll(winner, mergers, me);
 		}
@@ -202,15 +226,38 @@ public class EarlyGameStrategy implements IStrategy {
 	private void sellAll(List<Chain> mergers, Player me) {
 		for (Chain defunct : mergers) {
             int numICanSell = me.getStockSharesCount(defunct.getType());
-            me.sellStock(defunct.getType(), numICanSell, defunct.getStockPrice());
+            try{
+            	me.sellStock(defunct.getType(), numICanSell, defunct.getStockPrice());
+            }catch(Exception e){
+            	//System.out.println("Attempted to sell stock that we have none of");
+            }
         }
+	}
+
+	private void tradeOne(Chain winner, List<Chain> mergers, Player me) {
+		for (Chain merger : mergers) {
+			ChainType type = merger.getType();
+		    int numICanTrade = me.getStockSharesCount(type);
+	    	if(numICanTrade > 1){
+	    		try{
+		    		me.tradeStock(type, 2, winner.getType());
+		    		break;
+		    	}catch(NullPointerException e){
+		    		//System.out.println("Attempted to trade stock that we have none of");
+		    	}
+	    	}
+		}
 	}
 
 	private void tradeAll(Chain winner, List<Chain> mergers, Player me) {
 		for (Chain merger : mergers) {
 			ChainType type = merger.getType();
 		    int numICanTrade = me.getStockSharesCount(type);
-		    me.tradeStock(type, numICanTrade, winner.getType());
+		    try{
+		    	me.tradeStock(type, numICanTrade, winner.getType());
+		    }catch(NullPointerException e){
+		    	//System.out.println("Attempted to trade stock that we have none of");
+		    }
 		}
 	}
 
@@ -236,7 +283,7 @@ public class EarlyGameStrategy implements IStrategy {
     	//or any chain is safe
     	//set to midgame strategy
     	List<Chain> activeChains = game.getActiveChains();
-    	if(activeChains.size() > 3 && game.getPlayedTiles().size() > 20){
+    	if(activeChains.size() > 4 && game.getPlayedTiles().size() > 32){
         	me.setCurrentStrategy(new MidGameStrategy());
     	}
     	for(Chain chain : activeChains){

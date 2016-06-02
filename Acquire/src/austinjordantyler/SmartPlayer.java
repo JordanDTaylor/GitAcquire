@@ -42,7 +42,7 @@ public class SmartPlayer extends Player implements Game.Listener {
     }
 
     private boolean isWinning(Game game) {
-        return false;
+        return true;
     }
 
     @Override

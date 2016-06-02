@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
  * The general strategy is to prepare for the end game by owning majority stocks in the upcoming large chains.
  */
 public class MidGameStrategy implements IStrategy {
-    private static final double CENTER_WEIGHT = 0.05;
-    private static final double NEW_CHAIN_SCORE = 1.0;
+    private static final double CENTER_WEIGHT = 0.20;
+    private static final double NEW_CHAIN_SCORE = 1.5;
     private static final double GROW_CHAIN_SCORE = 1.25;
     private static final double MERGE_CHAIN_SCORE = 2.0;
 
@@ -75,6 +75,7 @@ public class MidGameStrategy implements IStrategy {
      */
     @Override
     public void resolveMergedStock(Chain winner, List<Chain> mergers, SmartPlayer me, List<Player> otherPlayers) {
+    	mergers.remove(winner);
         ChainType tradingTo = winner.getType();
         List<ChainType> tradingFrom = mergers.stream() // TODO does this include all chains? or only defunct
                 .map(Chain::getType)
@@ -124,9 +125,8 @@ public class MidGameStrategy implements IStrategy {
                 .filter(Chain::isSafe)
                 .count();
         int numNonSafeChains = game.getActiveChains().size() - numSafeChains;
-        if (numSafeChains > numNonSafeChains) {
-            me.setCurrentStrategy(new EndGameStrategy());
-            System.out.println("SMARTPLAYER: SWITCHING STRATEGY TO END GAME");
+        if (numSafeChains >= numNonSafeChains) {
+            //me.setCurrentStrategy(new EndGameStrategy());
         }
     }
 
