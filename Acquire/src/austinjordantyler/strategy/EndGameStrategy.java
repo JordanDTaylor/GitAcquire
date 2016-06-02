@@ -102,6 +102,8 @@ public class EndGameStrategy implements IStrategy {
                 .collect(Collectors.toList());
 
         PlayerState initialState = PlayerState.fromPlayer(me, theGame);
+
+
     }
 
 
@@ -127,6 +129,9 @@ public class EndGameStrategy implements IStrategy {
      * Ending the Game
      * - The game should end at the end of your turn if the game can end, and the player is winning.
      * - TODO Consider ending the game if a higher rank is unreachable (e.g. you are in second place, cannot reach first place, and do not want to drop into third place, so you end the game).
+     *
+     * @param game
+     * @param me
      */
     @Override
     public void endTurn(Game game, SmartPlayer me) {
@@ -237,7 +242,6 @@ public class EndGameStrategy implements IStrategy {
         }
         return score;
     }
-
     private boolean majorityAfterTrade(List<ChainType> defunctChains, ChainType winningChainType){
         return PlayerUtils.willBeMajorityStockHolderAfterTrade(self, playerList, defunctChains, winningChainType);
     }
