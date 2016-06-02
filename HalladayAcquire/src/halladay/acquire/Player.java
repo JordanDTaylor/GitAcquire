@@ -104,7 +104,6 @@ public abstract class Player {
 		int count = stocks.get(chain);
 		count -= amount;
 		stocks.put(chain, count);
-		chain.sellShares(amount);
 	}
 
 	protected void acquireStock(ChainType chain, int amount) {
