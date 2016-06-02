@@ -32,7 +32,7 @@ public class PlayerUtils {
             }
         }
 
-        return numMyCurrentShares + xMoreShares >= numSecondaryShareHolderShares;
+        return numMyCurrentShares + xMoreShares >= numMajorityShareHolderShares;
     }
 
     public static boolean willBeMajorityStockHolderAfterPurchasing(Player me,

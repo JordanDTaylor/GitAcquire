@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
  * The general strategy is to prepare for the end game by owning majority stocks in the upcoming large chains.
  */
 public class MidGameStrategy implements IStrategy {
-    private static final double CENTER_WEIGHT = 0.05;
-    private static final double NEW_CHAIN_SCORE = 1.0;
+    private static final double CENTER_WEIGHT = 0.20;
+    private static final double NEW_CHAIN_SCORE = 1.5;
     private static final double GROW_CHAIN_SCORE = 1.25;
     private static final double MERGE_CHAIN_SCORE = 2.0;
 
@@ -38,7 +38,6 @@ public class MidGameStrategy implements IStrategy {
                 choice = tile;
             }
         }
-        System.out.println("SMARTPLAYER: placing tile: " + choice.getLocation());
         TileUtils.placeTile(game, me, choice);
     }
 
@@ -61,8 +60,8 @@ public class MidGameStrategy implements IStrategy {
             int price = chainType.getStockPrice(activeChain.getHotelCount());
             while (cashToSpend >= price // can afford stock
                     && numToPurchase < purchasesLeft // allowed to buy stock
-                    && !PlayerUtils.willBeMajorityStockHolderAfterPurchasing(me, otherPlayers, chainType)) { // worth buying stock
-                numToPurchase += 1;
+                    && PlayerUtils.willBeMajorityStockHolderWithXMoreShares(me, otherPlayers, chainType, purchasesLeft)) { // worth buying stock
+                numToPurchase += 1; // TODO make the above mean will _become_ majority stock holder
                 cashToSpend -= activeChain.getStockPrice();
             }
             if (numToPurchase > 0) {
@@ -76,6 +75,7 @@ public class MidGameStrategy implements IStrategy {
      */
     @Override
     public void resolveMergedStock(Chain winner, List<Chain> mergers, SmartPlayer me, List<Player> otherPlayers) {
+    	mergers.remove(winner);
         ChainType tradingTo = winner.getType();
         List<ChainType> tradingFrom = mergers.stream() // TODO does this include all chains? or only defunct
                 .map(Chain::getType)
@@ -87,13 +87,17 @@ public class MidGameStrategy implements IStrategy {
             // trade ALL stock into winner
             for (ChainType defunct : tradingFrom) {
                 int numICanTrade = me.getStockSharesCount(defunct);
-                me.tradeStock(defunct, numICanTrade, tradingTo);
+                if (numICanTrade > 0) {
+                    me.tradeStock(defunct, numICanTrade, tradingTo);
+                }
             }
         } else {
             // sell ALL stock
             for (Chain defunct : mergers) {
                 int numICanSell = me.getStockSharesCount(defunct.getType());
-                me.sellStock(defunct.getType(), numICanSell, defunct.getStockPrice());
+                if (numICanSell > 0) {
+                    me.sellStock(defunct.getType(), numICanSell, defunct.getStockPrice());
+                }
             }
         }
     }
@@ -117,9 +121,9 @@ public class MidGameStrategy implements IStrategy {
 
     @Override
     public void endTurn(Game game, SmartPlayer me) {
-        int numSafeChains = game.getActiveChains().stream()
-                .map(chain -> chain.isSafe() ? 0 : 1)
-                .reduce(0, (x, y) -> x + y);
+        int numSafeChains = (int) game.getActiveChains().stream()
+                .filter(Chain::isSafe)
+                .count();
         int numNonSafeChains = game.getActiveChains().size() - numSafeChains;
         if (numSafeChains >= numNonSafeChains) {
             //me.setCurrentStrategy(new EndGameStrategy());
