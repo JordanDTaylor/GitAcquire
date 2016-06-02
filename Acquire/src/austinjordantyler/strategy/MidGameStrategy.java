@@ -220,5 +220,4 @@ public class MidGameStrategy implements IStrategy {
         }
         return score;
     }
-
 }

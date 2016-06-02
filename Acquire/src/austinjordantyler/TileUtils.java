@@ -3,8 +3,10 @@ package austinjordantyler;
 import halladay.acquire.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class TileUtils {
@@ -71,5 +73,31 @@ public class TileUtils {
                 }
             }
         }
+    }
+    public static Set<Hotel> AllTiles; //12c x 9r board
+
+    static {
+        AllTiles = new HashSet<>();
+        for (int row = 0; row < 9; row++) {
+            for (int col = 0; col < 12; col++) {
+                AllTiles.add(new Hotel(new Location(row, col)));
+            }
+        }
+    }
+
+    public static Set<Hotel> getUnplayedTiles(Game game) {
+        Set<Hotel> playedTiles = game.getPlayedTiles()
+                .stream()
+                .collect(Collectors.toCollection(HashSet<Hotel>::new));
+        Set<Hotel> allTiles = new HashSet<>(AllTiles);
+        allTiles.removeAll(playedTiles);
+        return allTiles;
+    }
+
+    public static Set<Hotel> getUnplayedLiveTiles(Game game){
+        Set<Hotel> unPlayedTiles = getUnplayedTiles(game);
+        return unPlayedTiles.stream()
+                .filter(t->game.isPlayable(t))
+                .collect(Collectors.toCollection(HashSet<Hotel>::new));
     }
 }
